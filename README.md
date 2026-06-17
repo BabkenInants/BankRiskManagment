@@ -2,7 +2,7 @@
 
 A machine learning web application that evaluates the credit risk of loan applicants using the German Credit Dataset. Given an applicant's financial and personal details, the model predicts whether they are a good or bad credit risk and provides a probability score.  
 Created as a final project for our Python Pandas Practice in YSCI  
-[Live demo](https://bankriskmanagment.streamlit.app/)
+Live demo: https://bankriskmanagment.streamlit.app
 
 ---
 
@@ -15,7 +15,7 @@ Banks and financial institutions need reliable tools to assess whether a loan ap
 ## Dataset
 
 **German Credit Dataset**  
-[Source](https://www.kaggle.com/datasets/mpwolke/cusersmarildownloadsgermancsv)
+Source: https://www.kaggle.com/datasets/mpwolke/cusersmarildownloadsgermancsv
 
 - 1000 applicant records
 - 20 feature columns covering financial status, personal profile, and assets
