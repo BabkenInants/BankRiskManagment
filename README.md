@@ -62,15 +62,17 @@ Performance on the test set (200 samples, 80/20 split):
 
 ```
 bankriskmanagment/
-├── app.py                 # Streamlit web application
-├── sample.ipynb           # Data exploration, model training, and evaluation
-├── german.csv             # Raw dataset
-├── credit_model.pkl       # Trained Logistic Regression model
-├── scaler.pkl             # Fitted StandardScaler
-├── requirements.txt       # Python dependencies
+├── data/
+│   └── german.csv             # Raw dataset
+├── app.py                     # Streamlit web application
+├── sample.ipynb               # Data exploration, model training, and evaluation
+├── credit_model.pkl           # Trained Logistic Regression model
+├── scaler.pkl                 # Fitted StandardScaler
+├── columns.pkl                # Saved column order used during training
+├── requirements.txt           # Python dependencies
+├── LICENSE
 └── README.md
 ```
-
 ---
 
 ## Installation
@@ -79,7 +81,7 @@ bankriskmanagment/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/bankriskmanagment.git
+   git clone https://github.com/BabkenInants/BankRiskManagment.git
    cd bankriskmanagment
    ```
 
@@ -133,4 +135,5 @@ Babken Inants
 
 ## License
 [MIT License](/LICENSE)
+
 This project was built for educational purposes as part of a machine learning practice assignment. The dataset we used is publicly available on Kaggle under its original license.

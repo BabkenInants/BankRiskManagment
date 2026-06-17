@@ -325,6 +325,9 @@ if evaluate:
         "Foreign_Worker": foreign_worker
     }])
 
+    columns = joblib.load("columns.pkl")
+    input_data = input_data[columns]
+
     num_cols_scale = ["Credit_Amount", "Age_years", "Duration_of_Credit_monthly"]
     input_data[num_cols_scale] = scaler.transform(input_data[num_cols_scale])
 
