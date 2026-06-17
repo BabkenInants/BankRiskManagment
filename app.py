@@ -3,173 +3,141 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 
+# ===================== LOAD MODEL =====================
 model = joblib.load("credit_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
+# ===================== PAGE CONFIG =====================
 st.set_page_config(
-    page_title="Credit Risk AI",
+    page_title="Credit Risk System",
     layout="wide"
 )
 
-# ---------------- CLEAN DARK DESIGN ----------------
+# ===================== MINIMAL STYLE =====================
 st.markdown("""
 <style>
-
-html, body, [class*="css"] {
-    background-color: #0b0f19;
-    color: #e6edf3;
-    font-size: 18px;
+html, body {
+    background-color: #0e1117;
+    color: #e6e6e6;
+    font-size: 16px;
 }
 
 .stApp {
-    background-color: #0b0f19;
-    color: #e6edf3;
+    background-color: #0e1117;
+    color: #e6e6e6;
 }
 
-/* Titles */
 h1, h2, h3 {
-    color: #4cc9f0;
-    font-weight: 700;
+    color: #e6e6e6;
+    font-weight: 600;
 }
 
-/* Input labels */
 label {
-    color: #c9d1d9 !important;
-    font-size: 16px !important;
+    color: #cfcfcf !important;
+    font-size: 14px !important;
 }
 
-/* Input boxes */
-.stNumberInput input, .stSelectbox div {
-    background-color: #161b22 !important;
-    color: #e6edf3 !important;
-    border-radius: 8px;
-    font-size: 16px !important;
-}
-
-/* Button */
 .stButton > button {
-    background-color: #4cc9f0;
-    color: black;
-    font-size: 18px;
+    background-color: #1f1f1f;
+    color: white;
+    border: 1px solid #333;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 6px;
 }
 
+.stButton > button:hover {
+    background-color: #2a2a2a;
+}
 </style>
 """, unsafe_allow_html=True)
 
+# ===================== TITLE =====================
 st.title("🏦 Credit Risk Assessment System")
-
-st.write("AI-powered system for evaluating loan risk")
+st.write("Enter applicant details to evaluate credit risk using ML model")
 
 st.markdown("---")
 
-# ---------------- INPUTS (SAFE + VALIDATED) ----------------
+# ===================== INPUT FORM =====================
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("💰 Financial Information")
+    st.subheader("Financial Information")
 
     account_balance = st.selectbox(
-        "Account Balance (bank status)",
-        options=[1, 2, 3, 4],
-        format_func=lambda x: {
-            1: "1 - No account",
-            2: "2 - Low balance",
-            3: "3 - Medium balance",
-            4: "4 - High balance"
-        }[x],
-        help="Customer's bank account status"
+        "Account Balance",
+        [1, 2, 3, 4],
+        help="1 = No account, 2 = Low, 3 = Medium, 4 = High balance"
     )
 
-    credit_amount = st.number_input(
+    credit_amount = st.selectbox(
         "Credit Amount (€)",
-        min_value=100,
-        max_value=20000,
-        step=100,
-        help="Loan amount requested (100 - 20000)"
+        [1000, 2000, 5000, 10000, 15000, 20000],
+        help="Select loan amount (fixed allowed values)"
     )
 
     savings = st.selectbox(
         "Savings / Stocks",
-        options=[1, 2, 3, 4],
-        format_func=lambda x: {
-            1: "1 - Low savings",
-            2: "2 - Medium savings",
-            3: "3 - High savings",
-            4: "4 - Very high savings"
-        }[x],
-        help="Customer savings level"
+        [1, 2, 3, 4],
+        help="1 = Low savings, 4 = Very high savings"
     )
 
-    duration = st.slider(
+    duration = st.selectbox(
         "Credit Duration (months)",
-        min_value=6,
-        max_value=72,
-        step=6,
-        help="Loan duration (6 - 72 months)"
+        [6, 12, 24, 36, 48, 60, 72],
+        help="Loan duration in months"
+    )
+
+    purpose = st.selectbox(
+        "Loan Purpose",
+        [0, 1, 2, 3, 4],
+        help="Encoded category: e.g. car, education, business etc."
     )
 
 with col2:
-    st.subheader("👤 Personal Information")
+    st.subheader("Personal Information")
 
-    age = st.slider(
+    age = st.selectbox(
         "Age",
-        min_value=18,
-        max_value=75,
-        help="Customer age"
+        list(range(18, 76)),
+        help="Applicant age (18–75)"
     )
 
     employment = st.selectbox(
-        "Employment Length",
-        options=[1, 2, 3, 4, 5],
-        format_func=lambda x: {
-            1: "< 1 year",
-            2: "1-4 years",
-            3: "4-7 years",
-            4: "7+ years",
-            5: "Stable employment"
-        }[x],
-        help="Work experience level"
+        "Employment Level",
+        [1, 2, 3, 4, 5],
+        help="1 = unemployed, 5 = stable long-term job"
     )
 
     apartment = st.selectbox(
         "Housing Type",
-        options=[1, 2, 3],
-        format_func=lambda x: {
-            1: "Free housing",
-            2: "Rent",
-            3: "Own house"
-        }[x],
-        help="Living situation"
+        [1, 2, 3],
+        help="1 = free, 2 = rent, 3 = own house"
+    )
+
+    dependents = st.selectbox(
+        "Number of Dependents",
+        [0, 1, 2, 3, 4, 5],
+        help="Family dependents"
     )
 
     foreign_worker = st.selectbox(
         "Foreign Worker",
-        options=[0, 1],
-        format_func=lambda x: "Yes" if x == 1 else "No",
-        help="Whether customer is foreign worker"
+        [0, 1],
+        help="0 = No, 1 = Yes"
     )
 
-    dependents = st.number_input(
-        "Number of Dependents",
-        min_value=0,
-        max_value=5,
-        help="Family dependents (0-5)"
-    )
-
-# ---------------- PREDICTION ----------------
+# ===================== PREDICTION =====================
 
 st.markdown("---")
 
-if st.button("🔮 Predict Risk", use_container_width=True):
+if st.button("🔍 Evaluate Credit Risk"):
 
     input_data = pd.DataFrame([{
         "Account_Balance": account_balance,
         "Duration_of_Credit_monthly": duration,
         "Payment_Status_of_Previous_Credit": 0,
-        "Purpose": 0,
+        "Purpose": purpose,
         "Credit_Amount": credit_amount,
         "Value_Savings_Stocks": savings,
         "Length_of_current_employment": employment,
@@ -188,36 +156,64 @@ if st.button("🔮 Predict Risk", use_container_width=True):
         "Foreign_Worker": foreign_worker
     }])
 
-    continuous_cols = [
+    # scale numeric features
+    num_cols = [
         "Credit_Amount",
         "Age_years",
         "Duration_of_Credit_monthly"
     ]
 
-    input_data[continuous_cols] = scaler.transform(input_data[continuous_cols])
+    input_data[num_cols] = scaler.transform(input_data[num_cols])
 
-    prediction = model.predict(input_data)[0]
+    # prediction
+    pred = model.predict(input_data)[0]
     prob = model.predict_proba(input_data)[0][1]
 
+    # ===================== RESULT =====================
     st.markdown("## 📊 Result")
+
+    if pred == 1:
+        st.success("✔ GOOD CREDIT RISK")
+    else:
+        st.error("✖ BAD CREDIT RISK")
+
+    st.write(f"Probability of Good Risk: **{prob:.2%}**")
+
+    st.progress(float(prob))
+
+    # ===================== CHARTS =====================
+    st.markdown("## 📈 Analysis Dashboard")
 
     colA, colB = st.columns(2)
 
     with colA:
-        if prediction == 1:
-            st.success("✅ GOOD CREDIT RISK")
-        else:
-            st.error("❌ BAD CREDIT RISK")
+        fig, ax = plt.subplots()
+        ax.bar(
+            ["Bad Risk", "Good Risk"],
+            [1 - prob, prob],
+            color=["#444444", "#dddddd"]
+        )
+        ax.set_ylim(0, 1)
+        ax.set_title("Risk Probability Distribution")
+        st.pyplot(fig)
 
     with colB:
-        st.metric("Good Risk Probability", f"{prob:.2%}")
+        fig, ax = plt.subplots()
+        ax.pie(
+            [prob, 1 - prob],
+            labels=["Good", "Bad"],
+            autopct="%1.1f%%",
+            colors=["#dddddd", "#444444"]
+        )
+        ax.set_title("Risk Share")
+        st.pyplot(fig)
 
-    st.progress(float(prob))
+    # ===================== SIMPLE INSIGHT =====================
+    st.markdown("### 📌 Insight")
 
-    # ---------------- SIMPLE VISUAL ----------------
-    st.markdown("### 📈 Risk Breakdown")
-
-    fig, ax = plt.subplots()
-    ax.bar(["Bad Risk", "Good Risk"], [1-prob, prob], color=["#ff4b4b", "#4caf50"])
-    ax.set_ylim(0, 1)
-    st.pyplot(fig)
+    if prob > 0.7:
+        st.info("Low risk applicant — likely to repay loan.")
+    elif prob > 0.4:
+        st.warning("Medium risk applicant — review recommended.")
+    else:
+        st.error("High risk applicant — loan not recommended.")
