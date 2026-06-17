@@ -9,211 +9,441 @@ scaler = joblib.load("scaler.pkl")
 
 # ===================== PAGE CONFIG =====================
 st.set_page_config(
-    page_title="Credit Risk System",
-    layout="wide"
+    page_title="Credit Risk Assessment",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# ===================== MINIMAL STYLE =====================
+# ===================== STYLE =====================
 st.markdown("""
 <style>
-html, body {
-    background-color: #0e1117;
-    color: #e6e6e6;
-    font-size: 16px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+
+.stApp { background-color: #080c14; }
+
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1400px;
 }
 
-.stApp {
-    background-color: #0e1117;
-    color: #e6e6e6;
+.header-banner {
+    background: linear-gradient(135deg, #0d1b2e 0%, #0f2744 50%, #0a1628 100%);
+    border: 1px solid #1e3a5f;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+.header-icon { font-size: 2.8rem; line-height: 1; }
+.header-title {
+    font-size: 1.9rem; font-weight: 700; color: #e8f0fe;
+    letter-spacing: -0.02em; margin: 0;
+}
+.header-sub {
+    font-size: 0.875rem; color: #6b8bb5;
+    margin: 0.25rem 0 0 0; font-weight: 400;
 }
 
-h1, h2, h3 {
-    color: #e6e6e6;
+.section-card {
+    background: #0d1520;
+    border: 1px solid #1a2d45;
+    border-radius: 12px;
+    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+    margin-bottom: 1rem;
+}
+.section-label {
+    font-size: 0.7rem;
     font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3d7cc9;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #1a2d45;
 }
 
-label {
-    color: #cfcfcf !important;
-    font-size: 14px !important;
+div[data-baseweb="select"] > div {
+    background-color: #0a1220 !important;
+    border-color: #1e3a5f !important;
+    border-radius: 8px !important;
+    color: #c8d8f0 !important;
+}
+div[data-baseweb="popover"] { background-color: #0d1520 !important; border: 1px solid #1e3a5f !important; }
+li[role="option"] { background-color: #0d1520 !important; color: #c8d8f0 !important; }
+li[role="option"]:hover { background-color: #1a2d45 !important; }
+
+label, .stSelectbox label, .stSlider label, .stNumberInput label {
+    color: #7a9ec4 !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
 }
 
-.stButton > button {
-    background-color: #1f1f1f;
-    color: white;
-    border: 1px solid #333;
-    padding: 10px;
-    border-radius: 6px;
+input[type="number"] {
+    background-color: #0a1220 !important;
+    color: #c8d8f0 !important;
+    border-color: #1e3a5f !important;
 }
 
-.stButton > button:hover {
-    background-color: #2a2a2a;
+div[data-testid="stButton"] > button {
+    background: linear-gradient(135deg, #1a4a8a, #2563b0) !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0.75rem 2.5rem !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    box-shadow: 0 4px 15px rgba(37,99,176,0.3) !important;
 }
+div[data-testid="stButton"] > button:hover {
+    background: linear-gradient(135deg, #1e56a0, #2d74d0) !important;
+    box-shadow: 0 6px 20px rgba(37,99,176,0.5) !important;
+}
+
+.result-good {
+    background: linear-gradient(135deg, #0a2a1a, #0d3320);
+    border: 1px solid #1a6640;
+    border-left: 4px solid #22c55e;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 1rem 0;
+}
+.result-bad {
+    background: linear-gradient(135deg, #2a0a0a, #330d0d);
+    border: 1px solid #66201a;
+    border-left: 4px solid #ef4444;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 1rem 0;
+}
+.result-verdict { font-size: 0.68rem; color: #6b8bb5; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin: 0; }
+.result-title { font-size: 1.4rem; font-weight: 700; margin: 0.3rem 0; }
+.result-good .result-title { color: #22c55e; }
+.result-bad .result-title { color: #ef4444; }
+.result-prob { font-family: 'JetBrains Mono', monospace; font-size: 2.6rem; font-weight: 500; margin: 0.25rem 0 0 0; }
+.result-good .result-prob { color: #4ade80; }
+.result-bad .result-prob { color: #f87171; }
+.result-prob-label { font-size: 0.68rem; color: #6b8bb5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+
+.metric-row { display: flex; gap: 0.75rem; margin: 0.75rem 0; }
+.metric-chip {
+    background: #0d1520; border: 1px solid #1a2d45; border-radius: 8px;
+    padding: 0.6rem 1rem; flex: 1;
+}
+.mc-label { font-size: 0.62rem; color: #4d6a8a; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+.mc-value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #c8d8f0; font-weight: 500; margin-top: 0.1rem; }
+
+.insight-box {
+    background: #0d1520; border: 1px solid #1a2d45; border-radius: 10px;
+    padding: 0.9rem 1.1rem; margin-top: 0.75rem;
+    font-size: 0.85rem; color: #8ba8cc; line-height: 1.6;
+}
+
+.styled-divider { border: none; border-top: 1px solid #1a2d45; margin: 1.5rem 0; }
 </style>
 """, unsafe_allow_html=True)
 
-# ===================== TITLE =====================
-st.title("🏦 Credit Risk Assessment System")
-st.write("Enter applicant details to evaluate credit risk using ML model")
+# ===================== HEADER =====================
+st.markdown("""
+<div class="header-banner">
+    <div class="header-icon">🏦</div>
+    <div>
+        <p class="header-title">Credit Risk Assessment</p>
+        <p class="header-sub">ML-powered loan eligibility evaluation · German Credit Dataset</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown("---")
-
-# ===================== INPUT FORM =====================
-
-col1, col2 = st.columns(2)
+# ===================== 3-COLUMN FORM =====================
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.subheader("Financial Information")
+    st.markdown('<div class="section-card"><div class="section-label">💳 Loan Details</div>', unsafe_allow_html=True)
 
-    account_balance = st.selectbox(
-        "Account Balance",
-        [1, 2, 3, 4],
-        help="1 = No account, 2 = Low, 3 = Medium, 4 = High balance"
-    )
+    account_balance = st.selectbox("Account Balance", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "No account / Overdrawn",
+            2: "Low balance  (< 200 DM)",
+            3: "Medium balance  (≥ 200 DM)",
+            4: "No prior credit / Paid back"
+        }[x])
 
-    credit_amount = st.selectbox(
-        "Credit Amount (€)",
-        [1000, 2000, 5000, 10000, 15000, 20000],
-        help="Select loan amount (fixed allowed values)"
-    )
+    credit_amount = st.number_input("Credit Amount (DM)", min_value=250, max_value=20000, value=2500, step=250)
 
-    savings = st.selectbox(
-        "Savings / Stocks",
-        [1, 2, 3, 4],
-        help="1 = Low savings, 4 = Very high savings"
-    )
+    duration = st.slider("Duration (months)", min_value=6, max_value=72, value=24, step=6)
 
-    duration = st.selectbox(
-        "Credit Duration (months)",
-        [6, 12, 24, 36, 48, 60, 72],
-        help="Loan duration in months"
-    )
+    purpose = st.selectbox("Loan Purpose", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10],
+        format_func=lambda x: {
+            0: "Car (new)", 1: "Car (used)", 2: "Furniture / Equipment",
+            3: "Radio / Television", 4: "Domestic Appliances",
+            5: "Repairs", 6: "Education", 8: "Retraining",
+            9: "Business", 10: "Other"
+        }[x])
 
-    purpose = st.selectbox(
-        "Loan Purpose",
-        [0, 1, 2, 3, 4],
-        help="Encoded category: e.g. car, education, business etc."
-    )
+    instalment_pct = st.selectbox("Instalment Rate (% of income)", [1, 2, 3, 4],
+        format_func=lambda x: {1: "< 20%", 2: "20–25%", 3: "25–35%", 4: "≥ 35%"}[x])
+
+    payment_status = st.selectbox("Previous Credit Status", [0, 1, 2, 3, 4],
+        format_func=lambda x: {
+            0: "Paid duly — no issues",
+            1: "All credits paid back duly",
+            2: "Existing credits paid duly",
+            3: "Delay in paying off",
+            4: "Critical account"
+        }[x])
+
+    savings = st.selectbox("Savings / Stocks", [1, 2, 3, 4, 5],
+        format_func=lambda x: {
+            1: "< 100 DM", 2: "100–500 DM", 3: "500–1000 DM",
+            4: "≥ 1000 DM", 5: "Unknown / No savings"
+        }[x])
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.subheader("Personal Information")
+    st.markdown('<div class="section-card"><div class="section-label">👤 Personal Profile</div>', unsafe_allow_html=True)
 
-    age = st.selectbox(
-        "Age",
-        list(range(18, 76)),
-        help="Applicant age (18–75)"
-    )
+    age = st.slider("Age", min_value=18, max_value=75, value=35)
 
-    employment = st.selectbox(
-        "Employment Level",
-        [1, 2, 3, 4, 5],
-        help="1 = unemployed, 5 = stable long-term job"
-    )
+    sex_marital = st.selectbox("Sex / Marital Status", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "Male — Divorced / Separated",
+            2: "Female — Non-single  /  Male Single",
+            3: "Male — Married / Widowed",
+            4: "Female — Single"
+        }[x])
 
-    apartment = st.selectbox(
-        "Housing Type",
-        [1, 2, 3],
-        help="1 = free, 2 = rent, 3 = own house"
-    )
+    employment = st.selectbox("Length of Employment", [1, 2, 3, 4, 5],
+        format_func=lambda x: {
+            1: "Unemployed", 2: "< 1 year",
+            3: "1–4 years", 4: "4–7 years", 5: "≥ 7 years"
+        }[x])
 
-    dependents = st.selectbox(
-        "Number of Dependents",
-        [0, 1, 2, 3, 4, 5],
-        help="Family dependents"
-    )
+    occupation = st.selectbox("Occupation", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "Unskilled — Non-resident",
+            2: "Unskilled — Resident",
+            3: "Skilled / Official",
+            4: "Management / Highly Qualified"
+        }[x])
 
-    foreign_worker = st.selectbox(
-        "Foreign Worker",
-        [0, 1],
-        help="0 = No, 1 = Yes"
-    )
+    dependents = st.selectbox("Number of Dependents", [1, 2],
+        format_func=lambda x: "3 or more" if x == 1 else "0 to 2")
+
+    telephone = st.selectbox("Telephone", [1, 2],
+        format_func=lambda x: "Not registered" if x == 1 else "Yes — Registered")
+
+    foreign_worker = st.selectbox("Foreign Worker", [1, 2],
+        format_func=lambda x: "Yes" if x == 1 else "No")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col3:
+    st.markdown('<div class="section-card"><div class="section-label">🏠 Assets & Housing</div>', unsafe_allow_html=True)
+
+    apartment = st.selectbox("Housing Type", [1, 2, 3],
+        format_func=lambda x: {
+            1: "Free (with parents / employer)",
+            2: "Renting",
+            3: "Own property"
+        }[x])
+
+    most_valuable_asset = st.selectbox("Most Valuable Asset", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "Real estate",
+            2: "Life insurance / Savings",
+            3: "Car / Other",
+            4: "Unknown / None"
+        }[x])
+
+    duration_address = st.selectbox("Years at Current Address", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "< 1 year", 2: "1–4 years",
+            3: "4–7 years", 4: "≥ 7 years"
+        }[x])
+
+    guarantors = st.selectbox("Guarantors", [1, 2, 3],
+        format_func=lambda x: {1: "None", 2: "Co-applicant", 3: "Guarantor"}[x])
+
+    concurrent_credits = st.selectbox("Concurrent Credits", [1, 2, 3],
+        format_func=lambda x: {
+            1: "At other banks",
+            2: "At department stores",
+            3: "None"
+        }[x])
+
+    no_credits_bank = st.selectbox("Credits at This Bank", [1, 2, 3, 4],
+        format_func=lambda x: {
+            1: "One", 2: "Two or three",
+            3: "Four or five", 4: "Six or more"
+        }[x])
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ===================== BUTTON =====================
+st.markdown("""
+<style>
+div[data-testid="stButton"] {
+    display: flex;
+    justify-content: center;
+}
+div[data-testid="stButton"] > button {
+    width: auto !important;
+    padding: 0.75rem 3rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+evaluate = st.button("🔍  Evaluate Credit Risk")
 
 # ===================== PREDICTION =====================
-
-st.markdown("---")
-
-if st.button("🔍 Evaluate Credit Risk"):
-
+if evaluate:
     input_data = pd.DataFrame([{
         "Account_Balance": account_balance,
         "Duration_of_Credit_monthly": duration,
-        "Payment_Status_of_Previous_Credit": 0,
+        "Payment_Status_of_Previous_Credit": payment_status,
         "Purpose": purpose,
         "Credit_Amount": credit_amount,
         "Value_Savings_Stocks": savings,
         "Length_of_current_employment": employment,
-        "Instalment_per_cent": 0,
-        "Sex_Marital_Status": 0,
-        "Guarantors": 0,
-        "Duration_in_Current_address": 0,
-        "Most_valuable_available_asset": 0,
+        "Instalment_per_cent": instalment_pct,
+        "Sex_Marital_Status": sex_marital,
+        "Guarantors": guarantors,
+        "Duration_in_Current_address": duration_address,
+        "Most_valuable_available_asset": most_valuable_asset,
         "Age_years": age,
-        "Concurrent_Credits": 0,
+        "Concurrent_Credits": concurrent_credits,
         "Type_of_apartment": apartment,
-        "No_of_Credits_at_this_Bank": 0,
-        "Occupation": 0,
+        "No_of_Credits_at_this_Bank": no_credits_bank,
+        "Occupation": occupation,
         "No_of_dependents": dependents,
-        "Telephone": 0,
+        "Telephone": telephone,
         "Foreign_Worker": foreign_worker
     }])
 
-    # scale numeric features
-    num_cols = [
-        "Credit_Amount",
-        "Age_years",
-        "Duration_of_Credit_monthly"
-    ]
+    num_cols_scale = ["Credit_Amount", "Age_years", "Duration_of_Credit_monthly"]
+    input_data[num_cols_scale] = scaler.transform(input_data[num_cols_scale])
 
-    input_data[num_cols] = scaler.transform(input_data[num_cols])
-
-    # prediction
     pred = model.predict(input_data)[0]
     prob = model.predict_proba(input_data)[0][1]
+    bad_prob = 1 - prob
 
-    # ===================== RESULT =====================
-    st.markdown("## 📊 Result")
+    st.markdown("<hr class='styled-divider'>", unsafe_allow_html=True)
 
-    if pred == 1:
-        st.success("✔ GOOD CREDIT RISK")
-    else:
-        st.error("✖ BAD CREDIT RISK")
+    res_col, chart_col = st.columns([1, 1.6])
 
-    st.write(f"Probability of Good Risk: **{prob:.2%}**")
+    with res_col:
+        if pred == 1:
+            st.markdown(f"""
+            <div class="result-good">
+                <p class="result-verdict">Assessment Result</p>
+                <p class="result-title">✔ Good Credit Risk</p>
+                <p class="result-prob">{prob:.1%}</p>
+                <p class="result-prob-label">Probability of Repayment</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="result-bad">
+                <p class="result-verdict">Assessment Result</p>
+                <p class="result-title">✖ Bad Credit Risk</p>
+                <p class="result-prob">{bad_prob:.1%}</p>
+                <p class="result-prob-label">Probability of Default</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.progress(float(prob))
+        risk_level = "Low" if prob > 0.7 else ("Medium" if prob > 0.4 else "High")
+        risk_color = "#22c55e" if prob > 0.7 else ("#f59e0b" if prob > 0.4 else "#ef4444")
 
-    # ===================== CHARTS =====================
-    st.markdown("## 📈 Analysis Dashboard")
+        st.markdown(f"""
+        <div class="metric-row">
+            <div class="metric-chip">
+                <div class="mc-label">Good Risk</div>
+                <div class="mc-value">{prob:.1%}</div>
+            </div>
+            <div class="metric-chip">
+                <div class="mc-label">Bad Risk</div>
+                <div class="mc-value">{bad_prob:.1%}</div>
+            </div>
+        </div>
+        <div class="metric-row">
+            <div class="metric-chip">
+                <div class="mc-label">Risk Level</div>
+                <div class="mc-value" style="color:{risk_color}">{risk_level}</div>
+            </div>
+            <div class="metric-chip">
+                <div class="mc-label">Loan Amount</div>
+                <div class="mc-value">{credit_amount:,} DM</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    colA, colB = st.columns(2)
+        if prob > 0.7:
+            insight = "📗 Strong repayment profile. Applicant is statistically likely to service this loan without issue."
+        elif prob > 0.4:
+            insight = "📙 Borderline profile. Manual review recommended. Consider requesting additional collateral."
+        else:
+            insight = "📕 High default risk. Key risk factors may include low savings, poor account status, or long loan duration."
 
-    with colA:
-        fig, ax = plt.subplots()
-        ax.bar(
-            ["Bad Risk", "Good Risk"],
-            [1 - prob, prob],
-            color=["#444444", "#dddddd"]
+        st.markdown(f'<div class="insight-box">{insight}</div>', unsafe_allow_html=True)
+
+    with chart_col:
+        plt.rcParams.update({
+            "figure.facecolor": "#0d1520",
+            "axes.facecolor": "#0d1520",
+            "axes.edgecolor": "#1a2d45",
+            "axes.labelcolor": "#7a9ec4",
+            "xtick.color": "#7a9ec4",
+            "ytick.color": "#7a9ec4",
+            "text.color": "#c8d8f0",
+            "grid.color": "#1a2d45",
+        })
+
+        fig, axes = plt.subplots(1, 2, figsize=(9, 3.8))
+        fig.patch.set_facecolor("#0d1520")
+
+        # Bar chart
+        ax = axes[0]
+        bars = ax.bar(
+            ["Bad Risk", "Good Risk"], [bad_prob, prob],
+            color=["#ef4444", "#22c55e"], width=0.5, zorder=3
         )
-        ax.set_ylim(0, 1)
-        ax.set_title("Risk Probability Distribution")
-        st.pyplot(fig)
+        ax.set_ylim(0, 1.15)
+        ax.set_title("Risk Breakdown", fontsize=11, pad=10, color="#c8d8f0", fontweight="600")
+        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.0%}"))
+        ax.grid(axis="y", zorder=0, alpha=0.4)
+        ax.spines[["top", "right"]].set_visible(False)
+        for bar, val in zip(bars, [bad_prob, prob]):
+            ax.text(bar.get_x() + bar.get_width() / 2, val + 0.03,
+                    f"{val:.1%}", ha="center", va="bottom",
+                    fontsize=12, fontweight="600", color="#c8d8f0")
 
-    with colB:
-        fig, ax = plt.subplots()
-        ax.pie(
-            [prob, 1 - prob],
+        # Donut chart
+        ax2 = axes[1]
+        wedges, texts, autotexts = ax2.pie(
+            [prob, bad_prob],
             labels=["Good", "Bad"],
             autopct="%1.1f%%",
-            colors=["#dddddd", "#444444"]
+            colors=["#22c55e", "#ef4444"],
+            startangle=90,
+            pctdistance=0.75,
+            wedgeprops={"width": 0.55, "edgecolor": "#0d1520", "linewidth": 2}
         )
-        ax.set_title("Risk Share")
+        for t in texts:
+            t.set_color("#7a9ec4")
+            t.set_fontsize(10)
+        for at in autotexts:
+            at.set_color("#0d1520")
+            at.set_fontsize(10)
+            at.set_fontweight("700")
+        ax2.set_title("Risk Distribution", fontsize=11, pad=10, color="#c8d8f0", fontweight="600")
+        ax2.text(0, 0, f"{prob:.0%}\nGood", ha="center", va="center",
+                 fontsize=13, fontweight="700", color="#c8d8f0", linespacing=1.4)
+
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
-
-    # ===================== SIMPLE INSIGHT =====================
-    st.markdown("### 📌 Insight")
-
-    if prob > 0.7:
-        st.info("Low risk applicant — likely to repay loan.")
-    elif prob > 0.4:
-        st.warning("Medium risk applicant — review recommended.")
-    else:
-        st.error("High risk applicant — loan not recommended.")
+        plt.close()
