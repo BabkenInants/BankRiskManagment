@@ -168,14 +168,17 @@ with col1:
     account_balance = st.selectbox("Account Balance", [1, 2, 3, 4],
         format_func=lambda x: {
             1: "No account / Overdrawn",
-            2: "Low balance  (< 200 DM)",
-            3: "Medium balance  (≥ 200 DM)",
+            2: "Low balance  (< 200 €)",
+            3: "Medium balance  (≥ 200 €)",
             4: "No prior credit / Paid back"
-        }[x])
+        }[x],
+        help="The current status of the applicant's checking account. Applicants with no account or a negative balance are considered higher risk.")
 
-    credit_amount = st.number_input("Credit Amount (DM)", min_value=250, max_value=20000, value=2500, step=250)
+    credit_amount = st.number_input("Credit Amount (€)", min_value=250, max_value=20000, value=2500, step=250,
+        help="The total loan amount requested in euros. Higher amounts relative to income and savings increase the risk score.")
 
-    duration = st.slider("Duration (months)", min_value=6, max_value=72, value=24, step=6)
+    duration = st.slider("Duration (months)", min_value=6, max_value=72, value=24, step=6,
+        help="The repayment period of the loan in months. Longer durations increase exposure and generally correlate with higher risk.")
 
     purpose = st.selectbox("Loan Purpose", [0, 1, 2, 3, 4, 5, 6, 8, 9, 10],
         format_func=lambda x: {
@@ -183,10 +186,12 @@ with col1:
             3: "Radio / Television", 4: "Domestic Appliances",
             5: "Repairs", 6: "Education", 8: "Retraining",
             9: "Business", 10: "Other"
-        }[x])
+        }[x],
+        help="The stated reason for taking the loan. Business and education loans tend to carry different risk profiles than consumer goods purchases.")
 
     instalment_pct = st.selectbox("Instalment Rate (% of income)", [1, 2, 3, 4],
-        format_func=lambda x: {1: "< 20%", 2: "20–25%", 3: "25–35%", 4: "≥ 35%"}[x])
+        format_func=lambda x: {1: "< 20%", 2: "20–25%", 3: "25–35%", 4: "≥ 35%"}[x],
+        help="Monthly loan repayment as a percentage of the applicant's disposable income. Higher percentages indicate the applicant is more financially stretched.")
 
     payment_status = st.selectbox("Previous Credit Status", [0, 1, 2, 3, 4],
         format_func=lambda x: {
@@ -195,20 +200,23 @@ with col1:
             2: "Existing credits paid duly",
             3: "Delay in paying off",
             4: "Critical account"
-        }[x])
+        }[x],
+        help="How the applicant has handled past credit obligations. A history of delays or critical accounts is a strong negative signal for the model.")
 
     savings = st.selectbox("Savings / Stocks", [1, 2, 3, 4, 5],
         format_func=lambda x: {
-            1: "< 100 DM", 2: "100–500 DM", 3: "500–1000 DM",
-            4: "≥ 1000 DM", 5: "Unknown / No savings"
-        }[x])
+            1: "< 100 €", 2: "100–500 €", 3: "500–1000 €",
+            4: "≥ 1000 €", 5: "Unknown / No savings"
+        }[x],
+        help="The total value of the applicant's savings accounts and stock holdings. Higher savings act as a financial buffer and reduce predicted risk.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     st.markdown('<div class="section-card"><div class="section-label">👤 Personal Profile</div>', unsafe_allow_html=True)
 
-    age = st.slider("Age", min_value=18, max_value=75, value=35)
+    age = st.slider("Age", min_value=18, max_value=75, value=35,
+        help="The applicant's age in years. Age is used as a proxy for financial stability and career stage.")
 
     sex_marital = st.selectbox("Sex / Marital Status", [1, 2, 3, 4],
         format_func=lambda x: {
@@ -216,13 +224,15 @@ with col2:
             2: "Female — Non-single  /  Male Single",
             3: "Male — Married / Widowed",
             4: "Female — Single"
-        }[x])
+        }[x],
+        help="Combined sex and marital status category as defined in the original German Credit Dataset encoding.")
 
     employment = st.selectbox("Length of Employment", [1, 2, 3, 4, 5],
         format_func=lambda x: {
             1: "Unemployed", 2: "< 1 year",
             3: "1–4 years", 4: "4–7 years", 5: "≥ 7 years"
-        }[x])
+        }[x],
+        help="How long the applicant has been at their current job. Longer employment duration signals income stability and reduces predicted risk.")
 
     occupation = st.selectbox("Occupation", [1, 2, 3, 4],
         format_func=lambda x: {
@@ -230,16 +240,20 @@ with col2:
             2: "Unskilled — Resident",
             3: "Skilled / Official",
             4: "Management / Highly Qualified"
-        }[x])
+        }[x],
+        help="The applicant's occupational category. Higher skill levels generally correlate with more stable income and lower default risk.")
 
     dependents = st.selectbox("Number of Dependents", [1, 2],
-        format_func=lambda x: "3 or more" if x == 1 else "0 to 2")
+        format_func=lambda x: "3 or more" if x == 1 else "0 to 2",
+        help="The number of people financially dependent on the applicant (e.g. children, non-working spouse). More dependents reduce disposable income.")
 
     telephone = st.selectbox("Telephone", [1, 2],
-        format_func=lambda x: "Not registered" if x == 1 else "Yes — Registered")
+        format_func=lambda x: "Not registered" if x == 1 else "Yes — Registered",
+        help="Whether the applicant has a registered telephone number. Used in the original dataset as a minor indicator of social stability.")
 
     foreign_worker = st.selectbox("Foreign Worker", [1, 2],
-        format_func=lambda x: "Yes" if x == 1 else "No")
+        format_func=lambda x: "Yes" if x == 1 else "No",
+        help="Whether the applicant is classified as a foreign worker. Included as a demographic feature in the original dataset.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -251,7 +265,8 @@ with col3:
             1: "Free (with parents / employer)",
             2: "Renting",
             3: "Own property"
-        }[x])
+        }[x],
+        help="The applicant's current living situation. Owning property is considered a positive asset indicator; free housing may suggest limited financial independence.")
 
     most_valuable_asset = st.selectbox("Most Valuable Asset", [1, 2, 3, 4],
         format_func=lambda x: {
@@ -259,29 +274,34 @@ with col3:
             2: "Life insurance / Savings",
             3: "Car / Other",
             4: "Unknown / None"
-        }[x])
+        }[x],
+        help="The most significant asset the applicant owns. Assets serve as implicit collateral and improve the risk profile.")
 
     duration_address = st.selectbox("Years at Current Address", [1, 2, 3, 4],
         format_func=lambda x: {
             1: "< 1 year", 2: "1–4 years",
             3: "4–7 years", 4: "≥ 7 years"
-        }[x])
+        }[x],
+        help="How long the applicant has lived at their current address. Residential stability is a minor positive indicator of reliability.")
 
     guarantors = st.selectbox("Guarantors", [1, 2, 3],
-        format_func=lambda x: {1: "None", 2: "Co-applicant", 3: "Guarantor"}[x])
+        format_func=lambda x: {1: "None", 2: "Co-applicant", 3: "Guarantor"}[x],
+        help="Whether a third party co-signs or guarantees the loan. The presence of a guarantor reduces the lender's risk significantly.")
 
     concurrent_credits = st.selectbox("Concurrent Credits", [1, 2, 3],
         format_func=lambda x: {
             1: "At other banks",
             2: "At department stores",
             3: "None"
-        }[x])
+        }[x],
+        help="Whether the applicant currently has active credit lines elsewhere. Multiple concurrent credits increase the total debt burden.")
 
     no_credits_bank = st.selectbox("Credits at This Bank", [1, 2, 3, 4],
         format_func=lambda x: {
             1: "One", 2: "Two or three",
             3: "Four or five", 4: "Six or more"
-        }[x])
+        }[x],
+        help="The number of existing credit accounts the applicant holds at this bank. A high number may indicate over-reliance on credit.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -380,7 +400,7 @@ if evaluate:
             </div>
             <div class="metric-chip">
                 <div class="mc-label">Loan Amount</div>
-                <div class="mc-value">{credit_amount:,} DM</div>
+                <div class="mc-value">{credit_amount:,} €</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
